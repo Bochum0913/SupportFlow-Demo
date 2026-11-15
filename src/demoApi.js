@@ -1,6 +1,22 @@
 // Public portfolio demo: simulated API and rule-based chat. No network requests or API keys.
 const KEY = 'supportflow-public-demo-v1'
-const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] } }
+const sampleTickets = [
+  { id: 'INC-1001', issue: 'VPN disconnects after sign-in', category: 'Network', priority: 'High', status: 'In Progress', assignedTo: 'Support Team', createdAt: '2026-10-17T12:00:00.000Z', comments: [{ content: 'Checking connection logs.', createdAt: '2026-10-17T12:30:00.000Z' }] },
+  { id: 'INC-1002', issue: 'Cannot access shared calendar', category: 'Email', priority: 'Normal', status: 'Open', assignedTo: '', createdAt: '2026-10-18T10:00:00.000Z', comments: [] },
+  { id: 'INC-1003', issue: 'Printer setup on new laptop', category: 'Hardware', priority: 'Low', status: 'Resolved', assignedTo: 'Support Team', createdAt: '2026-10-19T09:00:00.000Z', comments: [{ content: 'Printer configured and tested.', createdAt: '2026-10-19T09:40:00.000Z' }] },
+]
+const load = () => {
+  try {
+    const stored = localStorage.getItem(KEY)
+    if (stored === null) {
+      const initial = sampleTickets.map(t => ({ ...t, comments: [...t.comments] }))
+      localStorage.setItem(KEY, JSON.stringify(initial))
+      return initial
+    }
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return sampleTickets.map(t => ({ ...t, comments: [...t.comments] })) }
+}
 const save = tickets => localStorage.setItem(KEY, JSON.stringify(tickets))
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
 const nextId = tickets => `INC-${Math.max(1000, ...tickets.map(t => Number(t.id?.split('-')[1]) || 1000)) + 1}`
@@ -10,9 +26,10 @@ const create = (tickets, issue, category = 'Other', priority = 'Normal') => {
 }
 
 export function installDemoApi() {
+  const nativeFetch = window.fetch.bind(window)
   window.fetch = async (input, init = {}) => {
     const path = new URL(typeof input === 'string' ? input : input.url, location.origin).pathname
-    if (!path.startsWith('/api/')) return json({ message: 'Demo mode does not access external APIs.' }, 404)
+    if (!path.startsWith('/api/')) return nativeFetch(input, init)
     const method = (init.method || 'GET').toUpperCase()
     let body = {}
     try { body = init.body ? JSON.parse(init.body) : {} } catch { return json({ message: 'Invalid JSON' }, 400) }
@@ -21,10 +38,7 @@ export function installDemoApi() {
       const message = String(body.message || '')
       const lower = message.toLowerCase()
       if (/(create|open|make).*(ticket|request)/i.test(message)) {
-        const category = /outlook|email/i.test(message) ? 'Email' : /vpn|wifi|network/i.test(message) ? 'Network' : 'Software'
-        const priority = /high|urgent/i.test(message) ? 'High' : 'Normal'
-        const ticket = create(tickets, `Demo request: ${message.slice(0, 250)}`, category, priority)
-        return json(`DEMO SIMULATION — Created ${ticket.id} with ${priority} priority. This is a local browser demo, not a live AI response.`)
+        return json('DEMO SIMULATION — I can help with that. For safety, this demo only creates a ticket after you click “Review & create ticket” and confirm. No ticket has been created yet.')
       }
       const match = message.match(/INC-\d+/i)
       if (match && /(priority|status)/i.test(message)) {
@@ -41,7 +55,7 @@ export function installDemoApi() {
     if (path === '/api/tickets' && method === 'GET') return json(tickets)
     if (path === '/api/tickets' && method === 'POST') {
       if (!String(body.issue || '').trim()) return json({ message: 'Issue is required' }, 400)
-      const ticket = create(tickets, String(body.issue).slice(0, 500), body.category || 'Other')
+      const ticket = create(tickets, String(body.issue).slice(0, 500), body.category || 'Other', ['Low', 'Normal', 'High'].includes(body.priority) ? body.priority : 'Normal')
       return json({ message: `Created ${ticket.id}` })
     }
     const match = path.match(/^\/api\/tickets\/([^/]+)(?:\/(status|priority|assignee|comments))?$/)

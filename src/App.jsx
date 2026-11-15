@@ -19,6 +19,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
+  const [chatOpenRequest, setChatOpenRequest] = useState(0)
 
   async function loadTickets() {
     setLoading(true)
@@ -188,9 +189,10 @@ async function addComment(id) {
       {DEMO && <div role="status" style={{background:"#fff3d6",border:"1px solid #e5b95d",borderRadius:10,padding:"12px 16px",marginBottom:18,color:"#684600",fontWeight:600}}>Portfolio demo — simulated AI replies and browser-only ticket data. No live AI or server connection. Data stays in this browser.</div>}
       <header className="page-header">
         <div className="brand-row"><span className="brand-mark" aria-hidden="true">✦</span><span className="brand-name">SupportFlow <span className="brand-suffix">/ Workspace</span></span></div>
-        <div className="header-heading"><div><p className="eyebrow">SUPPORT OPERATIONS</p><h1>Ticket overview</h1><p className="subtitle">Manage requests, track progress, and resolve issues with AI assistance.</p></div><span className="environment-pill"><span className="online-dot" /> Local workspace</span></div>
+        <div className="header-heading"><div><p className="eyebrow">SUPPORT OPERATIONS / INTERACTIVE DEMO</p><h1>Support that moves forward.</h1><p className="subtitle">Explore a support workspace: troubleshoot first, then track each request from open to resolved.</p><div className="hero-actions"><button type="button" onClick={() => setChatOpenRequest(n => n + 1)}>✦ Try the assistant</button><a className="hero-link" href="#new-ticket">Create a ticket <span aria-hidden="true">↗</span></a></div></div><span className="environment-pill"><span className="online-dot" /> Interactive portfolio</span></div>
       </header>
 
+      {DEMO && <div className="demo-guide"><strong>Explore the demo</strong><span>1. Ask the simulated assistant for help</span><span>2. Confirm a ticket if needed</span><span>3. Update its status or priority</span></div>}
       <section className="stats">
         <div className="stat"><div className="stat-label">Total tickets <span className="stat-icon">▤</span></div>
           <h2>{tickets.length}</h2>
@@ -208,18 +210,20 @@ async function addComment(id) {
 
       {error && <p className="error">{error}</p>}
 
-      <section className="panel">
+      <section className="panel" id="new-ticket">
         <div className="panel-heading"><div><h2>New support ticket</h2><p>Describe an issue to add it to the queue.</p></div><span className="panel-kicker">QUICK ACTION</span></div>
 
         <form className="create-form" onSubmit={createTicket}>
-          <input
+          <label htmlFor="issue-input" className="sr-only">Issue description</label>
+          <input id="issue-input"
             value={issue}
             onChange={e => setIssue(e.target.value)}
             placeholder="Describe the issue..."
             required
           />
 
-          <select
+          <label htmlFor="category-input" className="sr-only">Issue category</label>
+          <select id="category-input"
             value={category}
             onChange={e => setCategory(e.target.value)}
           >
@@ -293,7 +297,7 @@ async function addComment(id) {
         </div>
 
 
-        {loading ? <p>Loading...</p> : (
+        {loading ? <p role="status">Loading...</p> : (
           <div className="table-scroll"><table>
             <thead>
               <tr>
@@ -309,6 +313,9 @@ async function addComment(id) {
                 <tr
                   key={ticket.id}
                   onClick={() => viewTicket(ticket.id)}
+                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); viewTicket(ticket.id) } }}
+                  tabIndex={0}
+                  aria-label={`View details for ${ticket.id}`}
                 >
                   <td><span className="ticket-id">{ticket.id}</span></td>
                   <td className="issue-cell">{ticket.issue}</td>
@@ -327,6 +334,10 @@ async function addComment(id) {
         <div className="drawer-overlay" onClick={() => setSelected(null)}>
           <aside
             className="ticket-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Details for ticket ${selected.id}`}
+            onKeyDown={(event) => { if (event.key === 'Escape') setSelected(null) }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="drawer-header">
@@ -415,7 +426,8 @@ async function addComment(id) {
         </div>
       )}
 
-      <AIChat onActionComplete={loadTickets} />
+      <footer className="site-footer"><span>SupportFlow / Front-end portfolio experience</span><span>React · JavaScript · CSS · Simulated API</span><a href="https://github.com/Bochum0913/SupportFlow-Demo" target="_blank" rel="noreferrer">View source ↗</a></footer>
+      <AIChat onActionComplete={loadTickets} openRequest={chatOpenRequest} />
     </main>
   )
 }

@@ -11,20 +11,20 @@
 ## Highlights
 
 - Responsive SaaS-style ticket dashboard with total, open and resolved counts
-- Create support tickets and browse existing requests
+- Explore three clearly fictional sample tickets on first visit; create your own tickets and browse existing requests
 - Search and filter by status, priority and category
 - Review ticket details and update support workflows
-- Chat-style **simulated** assistant that can demonstrate ticket creation and priority changes
+- Chat-style **simulated** assistant with troubleshooting examples and **user-confirmed** ticket creation; ticket priority changes remain scripted
 - Browser-local persistence across page refreshes
 - Static hosting with Cloudflare Pages and GitHub-based deployments
 
 ## Try it
 
 1. Open [supportflow-demo.pages.dev](https://supportflow-demo.pages.dev).
-2. Create a ticket in **New support ticket**.
-3. Click **Ask AI** and enter: `Create a ticket for my VPN issue and set priority to High`.
-4. Find the new ticket in the list, then refresh the page to see browser-local persistence.
-5. Try: `Change INC-1001 priority to High` (replace the ID with a ticket shown in your browser).
+2. Explore the preloaded **fictional sample tickets**, or create one with **New support ticket**.
+3. Click **Try the assistant** and select a suggested troubleshooting issue.
+4. Click **Review & create ticket**, confirm, then find the new ticket in the list. Refresh to verify browser-local persistence.
+5. Try: `Change INC-1001 priority to High` (using an ID currently shown in your browser).
 
 The assistant matches common patterns; it is **not** an open-ended language model. Other instructions may not be recognized.
 
@@ -102,3 +102,11 @@ This demo does not collect tickets centrally, provide accounts, use a hosted dat
 - Stronger automated UI tests
 - Authenticated hosted backend with a persistent database
 - Protected real-AI mode with explicit rate and spend limits
+
+## 2026 portfolio refresh
+
+- Improved first-visit experience with fictional sample data, onboarding steps, stronger landing text, and clearer navigation.
+- Simulated assistant now requires an explicit visitor confirmation before creating a support ticket.
+- Added mobile-friendly prompt controls, keyboard-accessible ticket rows, site metadata, and source link.
+- No real AI, external backend, shared data, authentication, or private credentials are included.
+- **Existing visitors:** Previously saved browser-local ticket lists remain unchanged. To view the new sample tickets, clear this site's local storage in browser developer tools (this erases your saved demo tickets).
